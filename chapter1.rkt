@@ -44,18 +44,13 @@
 
 ;快速exp乘 
 (define (fast_expt b n)
-  (define (square k) (* k k) )
-  (define (reminder a b)
-    (if (< a b)
-        a
-        (reminder (- a b) b)))
-  (define (myeven? n)
-    (eq? (reminder n 2) 0))
-  
   (if (eq? n 1) b
-   (if (myeven? n)
-      (square (fast_expt b (/ n 2)))
+   (if (common.even? n)
+      (common.square (fast_expt b (/ n 2)))
       (* b (fast_expt b (- n 1))))))
+
+;(fast_expt 3 3)
+
 
 ;iter impl, just like fold,
 (define (fast_exp2 m n)
@@ -111,5 +106,74 @@
     ((eq? n 0) m)
     (else (gcd n (common.mod m n)))))
 
-(gcd 16 8)
+;(gcd 16 8)
+
+;find primarys 
+(define (primary_slow? n)
+  (define (smallest_div n)
+    (define (find_small i)
+      (define sq (my_sq n))
+      (cond 
+        ((> i  sq) n)
+        ((eq? (common.mod n i) 0) i)
+        (else (find_small (+ i 1)))))
+    (find_small 2))
+  (eq? (smallest_div n) n))
+
+
+;(primary_slow? 19)
+
+;todo 筛法 
+#|
+let primary?(n):
+	plist = 
+		var i = 2;
+		yield i;
+		loop:
+			i = i+1
+			if is_primary?(i):
+				yield i
+			is_primary?(i) = 
+				sq = sqare(i)
+				for p in plist:
+					if p > sq:
+						return true
+					else:
+						if mod(i p) == 0:
+							return false
+				
+	for p in plist:
+		if p == n:
+			return true
+		if p > n:
+			return false
+
+ |#
+
+
+;对一个数的power 取模
+(define (expmod base p n)
+  (define mod (common.mod base n))
+  (cond
+    ((eq? mod 0) 0)
+    ((eq? p 1) (common.mod base n))
+    ((common.even? p) 
+     (expmod (common.square mod) (/ p 2) n) )
+    (else 
+     (common.mod (* mod (expmod base (- p 1 ) n)) n))))
+ 
+  
+;(expmod 2 51 15)
+
+;ferma-test n
+
+
+
+
+
+
+
+
+
+
 
