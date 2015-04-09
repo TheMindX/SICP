@@ -1,9 +1,10 @@
 #lang racket
 
-(provide common.square)
-(provide common.cube)
-(provide common.mod)
-(provide common.even?)
+(provide common.square) ;平方
+(provide common.cube) ;立方
+(provide common.mod) ;取模
+(provide common.even?) ;是否偶数
+(provide common.println) ;打印
 
 (define (common.square n)
   (* n n))
@@ -19,3 +20,6 @@
   (eq? (common.mod x 2) 0))
   
 
+(define (common.println x)
+  (display x)
+  (display "\n"))

@@ -166,14 +166,27 @@ let primary?(n):
 ;(expmod 2 51 15)
 
 ;ferma-test n
-
-
-
-
-
-
-
-
-
+;素数检测
+(define (ferma-test x)
+  (define times 25)
+  (define (randa) (+ 2 (random (- x 3))))
+  (define (testonce)
+    (define ra (randa))
+    (define em (expmod ra x x))
+    ;(common.println ra)
+    ;(common.println em)
+    (eq? em ra))
+  (define (testn i)
+    (if (eq? i times) 
+        true
+        (if (testonce) 
+            (testn (+ i 1))
+            false)))
+        
+    
+  (testn 1))
+  
+  
+(ferma-test 6833)
 
 
