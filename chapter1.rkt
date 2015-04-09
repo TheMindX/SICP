@@ -4,17 +4,17 @@
 
 ;开方 
 (define (my_sq x)
-	(define (sq_iter guess x)
-	  (if (goodenough guess x)
-		  guess
-		  (sq_iter (imporve guess x) x)))
-	(define (goodenough guess x)
-	  (if (< (abs (- (* guess guess) x)) 0.00000000000000001)
-		  #true
-		  #false))
-	(define (imporve guess x)
-	  (/ (+ guess (/ x guess) ) 2))
-    (sq_iter (/ x 2) x))
+  (define (sq_iter guess x)
+    (if (goodenough guess x)
+        guess
+        (sq_iter (imporve guess x) x)))
+  (define (goodenough guess x)
+    (if (< (abs (- (* guess guess) x)) 0.00000000000000001)
+        #true
+        #false))
+  (define (imporve guess x)
+    (/ (+ guess (/ x guess) ) 2))
+  (sq_iter (/ x 2) x))
 
 
 ;(exact->inexact (my_sq 2))
@@ -24,30 +24,30 @@
 (define (mypower n)
   (letrec ((mypower_iter
             (lambda (i c)
-             (if (eq? i (+ 1 n))
-               c
-               (mypower_iter (+ i 1) (* c i))))))
+              (if (eq? i (+ 1 n))
+                  c
+                  (mypower_iter (+ i 1) (* c i))))))
     
     (mypower_iter 1 1)) )
 
 ;(mypower 5)
-    
+
 ;named let
 (define (mypower1 n)
   (let loop ((i 1) (c 1))
     (if (eq? i n)
         (* i c)
         (loop (+ i 1) (* c i)))))
-  
+
 ;(mypower1 5)
 
 
 ;快速exp乘 
 (define (fast_expt b n)
   (if (eq? n 1) b
-   (if (common.even? n)
-      (common.square (fast_expt b (/ n 2)))
-      (* b (fast_expt b (- n 1))))))
+      (if (common.even? n)
+          (common.square (fast_expt b (/ n 2)))
+          (* b (fast_expt b (- n 1))))))
 
 ;(fast_expt 3 3)
 
@@ -56,8 +56,8 @@
 (define (fast_exp2 m n)
   (let loop((m1 m) (n1 n) (rem 1) )
     (let* ((mod (common.mod n1 2))
-          (div (/ (- n1 mod) 2))
-          (remIter (if (eq? mod 1) (* rem m1) rem)))
+           (div (/ (- n1 mod) 2))
+           (remIter (if (eq? mod 1) (* rem m1) rem)))
       (if (eq? n1 1)
           (* m1 rem)
           (loop (common.square m1) div remIter)))))
@@ -73,7 +73,7 @@
       (if (eq? b1 1)
           count1
           (loop (+ a1 a1) div count1)))))
-          
+
 ;(fast_mul 5 1024)
 
 ;;; sin 
@@ -83,7 +83,7 @@
       a
       (let ((sindiv3 (mysin (/ a 3))))
         (- (* 3 sindiv3) (* 4 (cube sindiv3))))))
-      
+
 
 ;(exact->inexact (mysin 5) )
 
@@ -96,8 +96,8 @@
   (iter 0 1 2))
 
 ;(fib 115)
-    
-  
+
+
 ;gcd
 (define (gcd m n)
   (cond 
@@ -153,16 +153,16 @@ let primary?(n):
 
 ;对一个数的power 取模
 (define (expmod base p n)
-  (define mod (common.mod base n))
+  (define mod (modulo base n))
   (cond
     ((eq? mod 0) 0)
     ((eq? p 1) (common.mod base n))
-    ((common.even? p) 
-     (expmod (common.square mod) (/ p 2) n) )
+    ((even? p) 
+     (expmod (* mod mod) (/ p 2) n) )
     (else 
-     (common.mod (* mod (expmod base (- p 1 ) n)) n))))
- 
-  
+     (modulo (* mod (expmod base (- p 1 ) n)) n))))
+
+
 ;(expmod 2 51 15)
 
 ;ferma-test n
@@ -182,11 +182,34 @@ let primary?(n):
         (if (testonce) 
             (testn (+ i 1))
             false)))
-        
-    
+  
   (testn 1))
-  
-  
-(ferma-test 6833)
+;(ferma-test 683333333)
+
+;common sum sigma
+(define (mysum a b termf nextf)
+  (if (> a b)
+      0
+      (begin
+        ;(common.println (termf a))
+        (+ (termf a) (mysum (nextf a) b termf nextf)))))
+
+
+(define (mypi times)
+  (define (term i)
+    (define a (+ 1 (* 4 (- i 1))))
+    (define b (+ a 2))
+    (/ 1 (* a b)))
+  (define (next i)
+    (+ i 1))
+  (define pi/8
+    (mysum 1 times term next))
+  (* pi/8 8))
+
+(display "PI ~ ")
+
+
+;(exact->inexact (mypi 1120))
+
 
 
