@@ -183,7 +183,11 @@ let primary?(n):
             (testn (+ i 1))
             false)))
   
-  (testn 1))
+  (cond ((< x 2) #f)
+        ((eq? x 2) #t)
+        ((eq? x 3) #t)
+        (else (testn 1))))
+  
 ;(ferma-test 683333333)
 
 ;common sum sigma
@@ -194,6 +198,13 @@ let primary?(n):
         ;(common.println (termf a))
         (+ (termf a) (mysum (nextf a) b termf nextf)))))
 
+;通用的累积 
+(define (accum a b mapf unit combinef nextf filterf)
+  (cond ((> a b) unit)
+        ((not (filterf a)) (accum (nextf a) b mapf unit combinef nextf filterf))
+        (else (combinef (mapf a) (accum (nextf a) b mapf unit combinef nextf filterf)))))
+      
+;(accum 1 100 identity 0 + (lambda (x) (+ 1 x)) (const true))
 
 (define (mypi times)
   (define (term i)
@@ -206,10 +217,59 @@ let primary?(n):
     (mysum 1 times term next))
   (* pi/8 8))
 
-(display "PI ~ ")
-
-
 ;(exact->inexact (mypi 1120))
+
+
+;integral
+(define (integral fx a b dx)
+  (letrec
+      ((iter (lambda (i c)
+               (if (>= i b)
+                   c
+                   (iter (+ dx i) (+ c (* dx (fx i))))))))
+    (iter a 0)))
+
+
+;(integral (lambda (x) (* x x x)) 0 1 0.001)
+
+(define (integral1 fx a b dx)
+  (mysum 0 1 (lambda (x) (* dx (fx x)))  (lambda (x) (+ x dx))))
+
+(integral1 common.cube 0 1 0.001)
+
+(define (simpsonsrlue fx a b divn) 
+  (define n (if (common.even? divn) 
+                divn
+                (+ 1 divn)))
+  (define h (/ (- b a) n))
+  (define (kh k) (cond ((eq? k 0) 1)
+                       ((eq? k n) 1)
+                       ((even? k) 2)
+                       (else 4)))
+  (define (yk k) (fx (+ a (* k h))))
+  (define (iter i c)
+    (if (> i n)
+        c
+        (iter (+ i 1) (+ c (* (kh i) (yk i))))))
+  ;(common.println n)
+  ;(common.println h)
+  (* (/ h 3) (iter 0 0)))
+                     
+
+;(integral (lambda (x) (/ 1 x)) 1 2 0.001)
+;(exact->inexact (simpsonsrlue (lambda (x) (/ 1 x)) 1 2 1000))
+;TODO fix integral1
+
+
+
+;求a~b中所有素数之和
+;(accum 1 10000 identity 0 + (lambda (x) (+ x 1)) ferma-test)
+
+
+
+
+
+
 
 
 
