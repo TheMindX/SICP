@@ -5,6 +5,7 @@
 (provide common.mod) ;取模
 (provide common.even?) ;是否偶数
 (provide common.println) ;打印
+(provide common.constant) ;常数
 
 (define (common.square n)
   (* n n))
@@ -23,3 +24,8 @@
 (define (common.println x)
   (display x)
   (display "\n"))
+
+
+(define (common.constant n)
+  (lambda (x) n))
+  

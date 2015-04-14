@@ -9,7 +9,7 @@
         guess
         (sq_iter (imporve guess x) x)))
   (define (goodenough guess x)
-    (if (< (abs (- (* guess guess) x)) 0.00000000000000001)
+    (if (< (abs (- (* guess guess) x)) 0.000000000000000000001)
         #true
         #false))
   (define (imporve guess x)
@@ -187,7 +187,7 @@ let primary?(n):
         ((eq? x 2) #t)
         ((eq? x 3) #t)
         (else (testn 1))))
-  
+
 ;(ferma-test 683333333)
 
 ;common sum sigma
@@ -203,7 +203,7 @@ let primary?(n):
   (cond ((> a b) unit)
         ((not (filterf a)) (accum (nextf a) b mapf unit combinef nextf filterf))
         (else (combinef (mapf a) (accum (nextf a) b mapf unit combinef nextf filterf)))))
-      
+
 ;(accum 1 100 identity 0 + (lambda (x) (+ 1 x)) (const true))
 
 (define (mypi times)
@@ -235,7 +235,7 @@ let primary?(n):
 (define (integral1 fx a b dx)
   (mysum 0 1 (lambda (x) (* dx (fx x)))  (lambda (x) (+ x dx))))
 
-(integral1 common.cube 0 1 0.001)
+;(integral1 common.cube 0 1 0.001)
 
 (define (simpsonsrlue fx a b divn) 
   (define n (if (common.even? divn) 
@@ -254,7 +254,7 @@ let primary?(n):
   ;(common.println n)
   ;(common.println h)
   (* (/ h 3) (iter 0 0)))
-                     
+
 
 ;(integral (lambda (x) (/ 1 x)) 1 2 0.001)
 ;(exact->inexact (simpsonsrlue (lambda (x) (/ 1 x)) 1 2 1000))
@@ -262,13 +262,101 @@ let primary?(n):
 
 
 
-;求a~b中所有素数之和
+;求a~b中所有素数之和， 
 ;(accum 1 10000 identity 0 + (lambda (x) (+ x 1)) ferma-test)
 
 
+;折半查找方程根 
+(define (search fx ia ib)
+  (define closerange 0.00001)
+  
+  (define-values (pos neg) 
+    (if (< (fx ia) 0)
+        (if (< (fx ib) 0)
+            (error (format "fx(~s) fx(~s) both below zero" ia ib) )
+            (values ib ia))
+        (if (>= (fx ib) 0)
+            (error (format "fx(~s) fx(~s) both above zero" ia ib) )
+            (values ia ib))))
+  (define (shelper pos neg)
+    ;(common.println (format "pos:~s neg:~s" pos neg))
+    (define midpoint (/ (+ pos neg) 2))
+    ;(common.println (format "mid: ~s" midpoint))
+    ;(common.println (format "fx mid: ~s" (fx midpoint)))
+    (if (<= (abs (- pos neg)) closerange)
+        midpoint
+        (if (< (fx midpoint) 0)
+            (shelper pos midpoint)
+            (shelper midpoint neg))))
+  
+  (shelper pos neg))
+
+;(search (lambda (x) (- (/ 1 x) 0.5)) 0.1 100)
 
 
 
+;fix point f(f(f(.....f(x))
+
+(define (fixpoint fx g)
+  (define (close_enough? v1 v2)
+    (< (abs (- v1 v2)) 0.0001))
+  
+  (define (iter v0)
+    (define v1 (fx v0))
+    (if (close_enough? v0 v1)
+        v1
+        (iter v1)))
+  (iter (fx g)))
+
+
+;求解 y = sin(y) + cos(y)
+;(fixpoint (lambda (x) (+ (sin x) (cos x))) 1)
+
+
+;fixp to sovle (x^2 = y) -> (x = y/x), slowly iter
+(define (sq n)
+  (define (f x) (/ (+ x (/ n x)) 2))
+  (fixpoint f (/ n 2)))
+
+;(exact->inexact (sq 25))
+;1.38
+
+
+
+;fix p to sovle golden section
+(define golden-section
+  (fixpoint (lambda (x) (+ 1 (/ 1 x))) 1))
+
+;(exact->inexact golden-section)
+
+
+;连分式 
+
+;递归 
+(define (cont-frac di ni)
+  (define maxk 100)
+  (define (helper i)
+    (if (eq? i maxk)
+        0
+        (let ((nk (ni i))
+              (dk (di i)))
+          (/ nk (+ dk (helper (+ i 1)))))))
+  (helper 1))
+    
+;(exact->inexact (cont-frac (common.constant 1) (common.constant 1)))
+
+;迭代 
+(define (cont-frac-iter di ni)
+  (define maxk 100)
+  (let loop ((i maxk) (vi (/ (ni (+ maxk 1)) (di (+ maxk 1)))))
+    (if (eq? i 0)
+        vi
+        (loop (- i 1) 
+              (let ((dk (di i)) (nk  (ni i)))
+                (/ nk (+ dk vi)))))))
+
+
+;(exact->inexact (cont-frac-iter (common.constant 1) (common.constant 1)))
 
 
 
