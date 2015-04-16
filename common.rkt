@@ -6,6 +6,7 @@
 (provide common.even?) ;是否偶数
 (provide common.println) ;打印
 (provide common.constant) ;常数
+(provide common.gcd) ;公备数
 
 (define (common.square n)
   (* n n))
@@ -28,4 +29,14 @@
 
 (define (common.constant n)
   (lambda (x) n))
-  
+
+
+
+;gcd
+(define (common.gcd m n)
+  (cond 
+    ((< m n) (common.gcd n m))
+    ((eq? n 0) m)
+    (else (gcd n (modulo m n)))))
+
+;(gcd 16 8)
