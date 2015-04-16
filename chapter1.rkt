@@ -217,7 +217,7 @@ let primary?(n):
     (mysum 1 times term next))
   (* pi/8 8))
 
-;(exact->inexact (mypi 1120))
+;(exact->inexact (mypi 120))
 
 
 ;integral
@@ -299,7 +299,7 @@ let primary?(n):
 
 (define (fixpoint fx g)
   (define (close_enough? v1 v2)
-    (< (abs (- v1 v2)) 0.0001))
+    (< (abs (- v1 v2)) 0.00001))
   
   (define (iter v0)
     (define v1 (fx v0))
@@ -356,8 +356,23 @@ let primary?(n):
                 (/ nk (+ dk vi)))))))
 
 
-;(exact->inexact (cont-frac-iter (common.constant 1) (common.constant 1)))
+;(cont-frac-iter (common.constant 1) (common.constant 1))
 
 
 
+;powerful newton method
+(define (deriv g)
+  (define dx 0.0001)
+  (lambda (x)
+    (/ (- (g (+ x dx)) (g x)) dx)))
 
+
+(define (newton-method f g)
+  (fixpoint (lambda (x) (- x (/ (f x) ((deriv f) x)))) g))
+
+
+(newton-method (lambda (x) (- (* x x) 10000)) 3)
+
+
+;TODO smooth function
+;TODO iterative improve
