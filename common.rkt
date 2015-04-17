@@ -6,7 +6,9 @@
 (provide common.even?) ;是否偶数
 (provide common.println) ;打印
 (provide common.constant) ;常数
-(provide common.gcd) ;公备数
+(provide common.gcd) ;公约数
+(provide common.typeof) ;类型
+
 
 (define (common.square n)
   (* n n))
@@ -40,3 +42,16 @@
     (else (gcd n (modulo m n)))))
 
 ;(gcd 16 8)
+
+(define common.typeof
+  (lambda (x)
+    (cond ((number? x) "Number")
+          ((pair? x) "Pair")
+          ((string? x) "String")
+          ;((port? x) "Port")
+          ((vector? x) "Vector")
+          ((boolean? x) "Boolean")
+          ((symbol? x) "Symbol")          
+		  ((procedure? x) "Procedure")          
+		  ))) 
+
