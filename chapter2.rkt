@@ -117,6 +117,120 @@
           ((f x) y)))
 
           
-;           
-           
-           
+;bound calc
+(define (make-interval a b)
+  (cons a b))
+
+(define (lower-bound x)
+  (car x))
+
+(define (upper-bound x)
+  (cdr x))
+
+(define (add-interval x y)
+  (define l (+ (lower-bound x) (lower-bound y)))
+  (define u (+ (upper-bound x) (upper-bound y)))
+  (make-interval l u))
+
+(define (mul-iterval x y)
+  (define l lower-bound)
+  (define u upper-bound)
+  (define p1 (* (l x) (l y)))
+  (define p2 (* (l x) (u y)))
+  (define p3 (* (u x) (l y)))
+  (define p4 (* (u x) (u y)))
+  (make-interval (min p1 p2 p3 p4) (max p1 p2 p3 p4)))
+
+
+
+(define (sub-interval x y)
+  (define l lower-bound)
+  (define u upper-bound)
+  (define m make-interval)
+  (m (- (l x) (u y)) (- (u x) (l y))))
+  
+
+(define (div-interval x y)
+  (define l lower-bound)
+  (define u upper-bound)
+  (define m make-interval)
+  (define (test-interval x)
+    (if (<= (* (l x) (u x)) 0)
+        (error (format "div-interval ~s ~s " x y) )
+        x))
+  
+  (define x1 (test-interval x))
+  (define y1 (test-interval y))
+  (define p1 (/ (l x) (l y)))
+  (define p2 (/ (l x) (u y)))
+  (define p3 (/ (u x) (l y)))
+  (define p4 (/ (u x) (u y)))
+  (m (min p1 p2 p3 p4) (max p1 p2 p3 p4)))
+
+  
+; todo 2.16
+  
+
+(define (list-ref items n)
+  (if (= n 0)
+      (car items)
+      (list-ref (cdr items) (- n 1))))
+
+
+
+(define (length items)
+  (if (null? items)
+      0
+      (+ 1 (length (cdr items)))))
+  
+
+(define (append la lb)
+  (if (null? la)
+      lb
+      (cons (car la) (append (cdr la) lb))))
+ ;(append (list 3 4 5 6) (list 8 9))
+
+
+(define (lastof x)
+  (define v1 (car x))
+  (define v2 (cdr x))
+  (if (null? v2)
+      v1
+      (lastof v2)))
+
+;(lastof (list 3 5 8 11))
+
+(define (reverse_s ls)
+  (if (null? ls)
+      null
+      (append (reverse_s (cdr ls)) (cons (car ls) null))))
+      
+;(reverse_s '(1 5 8 7 2))
+  
+    
+;2-19
+(define (cc amount coins)
+  (if (null? coins)
+      0
+      (let ((cur (car coins)))
+        (cond 
+              ((= amount cur) (+ 1 (cc amount (cdr coins))))
+              ((< amount cur) 0)
+              (else 
+               (+ 
+                (cc amount (cdr coins))
+                (cc (- amount cur) coins)))))))
+
+
+;(cc 100 (list 50 25))
+               
+            
+            
+
+
+
+
+
+
+
+  
