@@ -110,13 +110,13 @@
 
 (define two
   (lambda (f)
-          (lambda (x) (f(f x)))))
+    (lambda (x) (f(f x)))))
 
 (define (add x y)
   (lambda (f)
-          ((f x) y)))
+    ((f x) y)))
 
-          
+
 ;bound calc
 (define (make-interval a b)
   (cons a b))
@@ -148,7 +148,7 @@
   (define u upper-bound)
   (define m make-interval)
   (m (- (l x) (u y)) (- (u x) (l y))))
-  
+
 
 (define (div-interval x y)
   (define l lower-bound)
@@ -167,9 +167,9 @@
   (define p4 (/ (u x) (u y)))
   (m (min p1 p2 p3 p4) (max p1 p2 p3 p4)))
 
-  
+
 ; todo 2.16
-  
+
 
 (define (list-ref items n)
   (if (= n 0)
@@ -182,13 +182,13 @@
   (if (null? items)
       0
       (+ 1 (length (cdr items)))))
-  
+
 
 (define (append la lb)
   (if (null? la)
       lb
       (cons (car la) (append (cdr la) lb))))
- ;(append (list 3 4 5 6) (list 8 9))
+;(append (list 3 4 5 6) (list 8 9))
 
 
 (define (lastof x)
@@ -204,33 +204,74 @@
   (if (null? ls)
       null
       (append (reverse_s (cdr ls)) (cons (car ls) null))))
-      
+
 ;(reverse_s '(1 5 8 7 2))
-  
-    
+
+
 ;2-19
 (define (cc amount coins)
   (if (null? coins)
       0
       (let ((cur (car coins)))
         (cond 
-              ((= amount cur) (+ 1 (cc amount (cdr coins))))
-              ((< amount cur) 0)
-              (else 
-               (+ 
-                (cc amount (cdr coins))
-                (cc (- amount cur) coins)))))))
+          ((= amount cur) (+ 1 (cc amount (cdr coins))))
+          ((< amount cur) 0)
+          (else 
+           (+ 
+            (cc amount (cdr coins))
+            (cc (- amount cur) coins)))))))
 
 
 ;(cc 100 (list 50 25))
-               
+(define (filter t y)
+    (define (f) (car y))
+    (define (o) (cdr y))
+    (if (null? y) null
+        (if (t (f))
+            (cons (f) (filter t (o)))
+            (filter t (o)))))
+
+(define (same_parity . x)
+  
+  (define f (car x))
+  (define l (cdr x))
+  (if (null? x)
+      null
+      (let ((t (if (even? f)
+                   even?
+                   (lambda (x)
+                     (not (even? x))))))
+        (cons f (filter t l)))))
             
-            
+;(same_parity 3 4 5 6)
+
+(define (map f . ls)
+  (define (m f ls)
+    (define (x) (car ls))
+    (define (xs) (cdr ls))
+    (if (null? ls)
+        null
+        (cons (f (x)) (m f (xs)))))
+  (m f ls))
+
+;(map (lambda (x) (* x x)) 2 3 4)
 
 
-
-
-
-
-
+                          
+                          
+          
+      
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
