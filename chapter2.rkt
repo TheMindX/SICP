@@ -1,5 +1,6 @@
 #lang racket
 (require "common.rkt")
+(require "chapter1.rkt")
 #|
 (define (make-rat n d)
   (define cd (common.gcd n d))
@@ -245,7 +246,7 @@
             
 ;(same_parity 3 4 5 6)
 
-(define (map f . ls)
+(define (map_mul f . ls)
   (define (m f ls)
     (define (x) (car ls))
     (define (xs) (cdr ls))
@@ -257,21 +258,129 @@
 ;(map (lambda (x) (* x x)) 2 3 4)
 
 
-                          
-                          
-          
-      
+;this is fast accum
+(define (fold_l f a ls)
+  (cond
+    ((null? ls) a)
+    (else
+     (let* ((x (car ls))
+           (xs (cdr ls))
+           (next (f x a)))
+       (fold_l f next xs)))))
+
+
+(define (fold_r f a ls)
+  (cond
+    ((null? ls) a)
+    (else
+     (let* ((x (car ls))
+           (xs (cdr ls)))
+        
+       (f x (fold_r f a xs))))))
+
+
+(define (append1 a1 a2)
+  (fold_r 
+       cons
+       a2
+       a1))
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+;(append1 '(1 2) '(3 4))
+
+(define (map f ls)
+  (fold_r
+   (lambda (i a)
+     (cons (f i) a))
+   null
+   ls))
+   
+;(map (lambda (i) (* i i))   (list 1 2 3 4))
+
+(define (length1 ls)
+  (fold_l
+   (lambda (i a) (+ a 1))
+   0
+   ls))
+
+;(length1 '(1 2 3 4 6))
+
+
+(define (accumulate-n op init seqs)
+  (define (fs) (map car seqs))
+  (define (os)
+    (let* (
+          (pre_os (map cdr seqs))
+          (fir_os (car pre_os)))
+      (if (null? fir_os)
+          null
+          pre_os)))
+              
+              
+  (if (null? seqs) 
+      null
+      (cons (fold_l op init (fs)) (accumulate-n op init (os)))))
+
+;(accumulate-n + 0 (list (list 1 2 3) (list 1 4 3) (list 1 2 5)))
+
+(define (enumerate-interval n m)
+  (cond ((> n m) (error "n is bigger than m"))
+        ((eq? n m) (list m))
+        (else (cons n (enumerate-interval (+ n 1) m)))))
+
+(define (flatmap proc seq)
+    (fold_l append null (map proc seq)))
+
+(define (prime_pair n)
+
+  (define (pairs_under n)
+    (map (lambda (i) (list i n)) (enumerate-interval 1 (- n 1))))
+  (define (pairs_in n)
+    (flatmap pairs_under (enumerate-interval 2 n)))
+  (filter 
+   (lambda (p) (ferma-test (+ (car p) (car (cdr p)))))
+   (pairs_in n)))
+
+;(prime_pair 5)
+
+
+
+
+
+
+
+;八皇后
+;chess layout
+(define (eight_queen)
+  ;已有的layout新位置是否安全
+  (define (safe? layout n)
+    (define layout_1
+      (fold_r (lambda (i a) (cons (list i (+ 1 (length a))) a)) null layout))
+    (not (fold_r (lambda (i a) (or a 
+                                    (eq? (car i) n)
+                                    (eq? (+ (car i) (car (cdr i))) n)
+                                    (eq? (- (car i) (car (cdr i))) n))) false layout_1)))
+  (define (n_queen board_size)
+    ;n位置时的所有可能排列
+    (define (q_col n)
+      (if (eq? n 0)
+          '( ())
+          (letrec 
+           ((layouts (q_col (- n 1)))
+            ;基本n位置的n+1位置的组合
+            (safe_poss 
+             (lambda (layout)
+              (filter (lambda (n) (safe? layout n)) (enumerate-interval 1 8))))
+            (newlayouts (flatmap
+                         (lambda (layout)
+                           (map
+                            (lambda (i) (append layout (list i)))
+                            (safe_poss layout)))
+                         layouts)))
+           newlayouts)))
+    (q_col board_size) )
+  (n_queen 8))
+                           
+                     
+(eight_queen)
+
+;(newlayouts '( (6 3 1 7 5 8 2)))

@@ -52,6 +52,6 @@
           ((vector? x) "Vector")
           ((boolean? x) "Boolean")
           ((symbol? x) "Symbol")          
-		  ((procedure? x) "Procedure")          
+		  ((procedure? x) "Procedure")
 		  ))) 
 

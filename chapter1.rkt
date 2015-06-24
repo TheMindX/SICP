@@ -2,6 +2,8 @@
 
 (require "common.rkt")
 
+(provide ferma-test) ;素数测试
+
 ;开方 
 (define (my_sq x)
   (define (sq_iter guess x)
