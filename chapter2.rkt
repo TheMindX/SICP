@@ -257,21 +257,23 @@
 ;(map (lambda (x) (* x x)) 2 3 4)
 
 
-                          
-                          
-          
-      
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+(define (cout_leave t)
+  (define (x) (car t))
+  (define (xs) (cdr t))
+   (cond
+     ((null? t)  0)
+     ((pair? t) (+ (cout_leave (x)) (cout_leave (xs))))
+     (else  1)))
+
+
+;(display (cout_leave '(1 2 3 (5 6) 4)))
+
+
+
+
+     
+
+
+
+
+
