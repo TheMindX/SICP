@@ -225,12 +225,12 @@
 
 ;(cc 100 (list 50 25))
 (define (filter t y)
-    (define (f) (car y))
-    (define (o) (cdr y))
-    (if (null? y) null
-        (if (t (f))
-            (cons (f) (filter t (o)))
-            (filter t (o)))))
+  (define (f) (car y))
+  (define (o) (cdr y))
+  (if (null? y) null
+      (if (t (f))
+          (cons (f) (filter t (o)))
+          (filter t (o)))))
 
 (define (same_parity . x)
   
@@ -243,7 +243,7 @@
                    (lambda (x)
                      (not (even? x))))))
         (cons f (filter t l)))))
-            
+
 ;(same_parity 3 4 5 6)
 
 (define (map_mul f . ls)
@@ -264,8 +264,8 @@
     ((null? ls) a)
     (else
      (let* ((x (car ls))
-           (xs (cdr ls))
-           (next (f x a)))
+            (xs (cdr ls))
+            (next (f x a)))
        (fold_l f next xs)))))
 
 
@@ -274,17 +274,17 @@
     ((null? ls) a)
     (else
      (let* ((x (car ls))
-           (xs (cdr ls)))
-        
+            (xs (cdr ls)))
+       
        (f x (fold_r f a xs))))))
 
 
 (define (append1 a1 a2)
   (fold_r 
-       cons
-       a2
-       a1))
-  
+   cons
+   a2
+   a1))
+
 ;(append1 '(1 2) '(3 4))
 
 (define (map f ls)
@@ -293,7 +293,7 @@
      (cons (f i) a))
    null
    ls))
-   
+
 ;(map (lambda (i) (* i i))   (list 1 2 3 4))
 
 (define (length1 ls)
@@ -309,13 +309,13 @@
   (define (fs) (map car seqs))
   (define (os)
     (let* (
-          (pre_os (map cdr seqs))
-          (fir_os (car pre_os)))
+           (pre_os (map cdr seqs))
+           (fir_os (car pre_os)))
       (if (null? fir_os)
           null
           pre_os)))
-              
-              
+  
+  
   (if (null? seqs) 
       null
       (cons (fold_l op init (fs)) (accumulate-n op init (os)))))
@@ -328,10 +328,10 @@
         (else (cons n (enumerate-interval (+ n 1) m)))))
 
 (define (flatmap proc seq)
-    (fold_l append null (map proc seq)))
+  (fold_l append null (map proc seq)))
 
 (define (prime_pair n)
-
+  
   (define (pairs_under n)
     (map (lambda (i) (list i n)) (enumerate-interval 1 (- n 1))))
   (define (pairs_in n)
@@ -356,31 +356,93 @@
     (define layout_1
       (fold_r (lambda (i a) (cons (list i (+ 1 (length a))) a)) null layout))
     (not (fold_r (lambda (i a) (or a 
-                                    (eq? (car i) n)
-                                    (eq? (+ (car i) (car (cdr i))) n)
-                                    (eq? (- (car i) (car (cdr i))) n))) false layout_1)))
+                                   (eq? (car i) n)
+                                   (eq? (+ (car i) (car (cdr i))) n)
+                                   (eq? (- (car i) (car (cdr i))) n))) false layout_1)))
   (define (n_queen board_size)
     ;n位置时的所有可能排列
     (define (q_col n)
       (if (eq? n 0)
           '( ())
           (letrec 
-           ((layouts (q_col (- n 1)))
-            ;基本n位置的n+1位置的组合
-            (safe_poss 
-             (lambda (layout)
-              (filter (lambda (n) (safe? layout n)) (enumerate-interval 1 8))))
-            (newlayouts (flatmap
-                         (lambda (layout)
-                           (map
-                            (lambda (i) (append layout (list i)))
-                            (safe_poss layout)))
-                         layouts)))
-           newlayouts)))
+              ((layouts (q_col (- n 1)))
+               ;基本n位置的n+1位置的组合
+               (safe_poss 
+                (lambda (layout)
+                  (filter (lambda (n) (safe? layout n)) (enumerate-interval 1 8))))
+               (newlayouts (flatmap
+                            (lambda (layout)
+                              (map
+                               (lambda (i) (append layout (list i)))
+                               (safe_poss layout)))
+                            layouts)))
+            newlayouts)))
     (q_col board_size) )
   (n_queen 8))
-                           
-                     
-(eight_queen)
+
+
+;(eight_queen)
 
 ;(newlayouts '( (6 3 1 7 5 8 2)))
+
+
+;代数系统,符号求导
+(define (variable? e)
+  (symbol? e))
+
+(define (same-variable? v1 v2)
+  (and (variable? v1)
+       (variable? v2)
+       (eq? v1 v2)))
+
+(define (sum? e)
+  (eq? (car e) '+))
+
+(define (addend e)
+  (car (cdr e)))
+
+(define (augend e)
+  (car (cdr (cdr e))))
+
+(define (make-sum a1 a2)
+  (if (eq? a1 0)
+    a2
+    (if (eq? a2 0)
+      a1
+      (list '+ a1 a2))))
+
+(define (product? e)
+  (eq? (car e) '*))
+
+(define (multiplier e)
+  (car (cdr e)))
+
+(define (multiplicand e)
+  (car (cdr (cdr e))))
+
+(define (make-product a1 a2)
+  (if (eq? a1 1)
+    a2
+    (if (eq? a2 1)
+      a1
+      (list '* a1 a2))))
+
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp)
+         (if (same-variable? exp var)
+             1
+             0))
+        ((sum? exp)
+         (make-sum (deriv (addend exp) var)
+                   (deriv (augend exp) var)))
+        ((product? exp)
+         (make-sum
+          (make-product (multiplier exp)
+                        (deriv (multiplicand exp) var))
+          (make-product (multiplicand exp)
+                        (deriv (multiplier exp) var))))
+        (else
+         (error "unknown expression type"))))
+
+;(deriv '(+ x 3) 'x)
