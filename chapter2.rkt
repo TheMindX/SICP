@@ -421,11 +421,32 @@
   (car (cdr (cdr e))))
 
 (define (make-product a1 a2)
-  (if (eq? a1 1)
-    a2
-    (if (eq? a2 1)
-      a1
-      (list '* a1 a2))))
+  (if (eq? a1 0)
+      0
+      (if (eq? a2 0)
+          0
+          (if (eq? a1 1)
+              a2
+              (if (eq? a2 1)
+                  a1
+                  (list '* a1 a2))))))
+
+(define (make_power n p)
+  (if (eq? 0 p)
+      1
+      (if (eq? 1 p)
+          n
+          (list '** n p))))
+
+(define (power? np)
+  (and (eq? (car np) '**)
+    (number? (p_power np))))
+
+(define (p_base np)
+  (car (cdr np)))
+
+(define (p_power np)
+  (car (cdr (cdr np))))
 
 (define (deriv exp var)
   (cond ((number? exp) 0)
@@ -442,7 +463,53 @@
                         (deriv (multiplicand exp) var))
           (make-product (multiplicand exp)
                         (deriv (multiplier exp) var))))
+        ((power? exp) 
+          (make-product 
+            (p_power exp)
+            (make-product
+             (make_power 
+              (p_base exp) 
+              (- (p_power exp) 1))
+             (deriv (p_base exp) var))))
         (else
          (error "unknown expression type"))))
 
-;(deriv '(+ x 3) 'x)
+;(deriv '(** x 5) 'x)
+
+;todo 练习2.57
+
+;2.33 集合的表示
+;uneffecient set
+(define (element-of-set? x set)
+  (if (eq? set null)
+      false
+      (if (equal? x (car set))
+          true
+          (element-of-set? x (cdr set)))))
+
+;(element-of-set? 'y '(1 2 3 x))
+(define (adjoin x set)
+  (if (element-of-set? x set)
+    set
+    (cons x set)))
+
+
+(define (intersection-set s1 s2)
+  (cond ((null? s1) null)
+        ((null? s2) null)
+        (else (if (element-of-set? (car s1) s2)
+                  (cons (car s1)
+                        (intersection-set (cdr s1) s2))
+                  (intersection-set (cdr s1) s2)))))
+
+
+;(intersection-set '(1 2 3 4) '(4 3 2 0))
+(define (union-set s1 s2)
+  (fold_l adjoin s1 s2))
+
+;(union-set '(1 2 3 4) '(4 3 2 0))
+
+
+
+
+
