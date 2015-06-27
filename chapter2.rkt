@@ -522,7 +522,7 @@
 (define (right-branch tree) (cadr tree))
 (define (symbols tree)
   (if (leaf? tree)
-    (symbol-leaf tree)
+    (list (symbol-leaf tree))
     (caddr tree)))
   
 (define (weight tree)
@@ -551,7 +551,7 @@
         (decode1
           (cdr bits)
           (next-subtree (car bits) subtree)))))
-  (decode1 bits tree))
+  (decode1 (common.log bits) (common.log tree)))
 
 
 
@@ -573,5 +573,25 @@
       (adjoin-set leafItem (make-leaf-set (cdr pairs))))))
 
 
-
 ;(make-leaf-set '((a 1) (b 3) (c 2)))
+
+
+(define sample-tree
+  (make-code-tree (make-leaf 'A 4)
+                  (make-code-tree
+                   (make-leaf 'B 2)
+                   (make-code-tree
+                    (make-leaf 'D 1)
+                    (make-leaf 'C 1)))))
+
+(define sample-message '(0 1 1 0 0 1 0 1 0 1 1 1 0))
+
+(decode sample-message sample-tree)
+
+
+(define (myAdd a b)
+  (+ (common.log a) b))
+
+;(myAdd 3 4)
+
+
