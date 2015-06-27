@@ -491,3 +491,87 @@
 
 ;(ustable2bTree '(5 3 7 2 1 6 3))
 
+
+
+
+;huffman树的表示
+;left 结构
+(define (make-leaf symbol weight)
+  (list 'leaf symbol weight))
+
+
+(define (leaf? object)
+  (eq? (car object) 'leaf))
+
+(define (symbol-leaf x)
+  (cadr x))
+
+(define (weight-leaf x)
+  (caddr x))
+
+;tree node结构
+(define (make-code-tree left right)
+  (list
+    left
+    right
+    (append (symbols left) (symbols right))
+    (+ (weight left) (weight right))))
+
+
+(define (left-branch tree) (car tree))
+(define (right-branch tree) (cadr tree))
+(define (symbols tree)
+  (if (leaf? tree)
+    (symbol-leaf tree)
+    (caddr tree)))
+  
+(define (weight tree)
+  (if (leaf? tree)
+    (weight-leaf tree)
+    (cadddr tree)))
+
+(define (next-subtree bit subtree)
+  (if (eq? bit 0)
+    (left-branch subtree)
+    (right-branch subtree)))
+
+;huffman 解码
+(define (decode bits tree)
+  (define (decode1 bits subtree)
+    (if 
+      (eq? bits null)
+        (if 
+          (eq? subtree tree)
+          null
+          (error "no code complete"))
+      (if (leaf? subtree)
+        (cons
+          (symbol-leaf subtree)
+          (decode1 bits tree))
+        (decode1
+          (cdr bits)
+          (next-subtree (car bits) subtree)))))
+  (decode1 bits tree))
+
+
+
+(define (adjoin-set x set)
+  (cond 
+    ((null? set) (list x))
+    ((< (weight x) (weight (car set))) (cons x set))
+    (else (cons (car set) (adjoin-set x (cdr set))))))
+
+
+
+
+(define (make-leaf-set pairs)
+  (if (null? pairs)
+    null
+    (let*
+      ((pair (car pairs))
+       (leafItem (make-leaf (car pair) (cadr pair))))
+      (adjoin-set leafItem (make-leaf-set (cdr pairs))))))
+
+
+
+;(make-leaf-set '((a 1) (b 3) (c 2)))
