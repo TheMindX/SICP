@@ -631,12 +631,42 @@
     (car treeset)
     (fhelp (cdr treeset) (car treeset))))
 
-
 ;(generate-huffman-tree '((A 3) (B 14) (C 5)))
-
 ;TODO, 2.41
 ;TODO, 2.42
 ;TODO, 2.43
 ;TODO, 2.44
 
 ;2.53
+
+(define (add-complex z1 z2)
+  (make-from-real-img (+ (real-part z1) (real-part z2))
+                      (+ (imag-part z1) (imag-part z2))))
+
+
+(define (sub-comlex z1 z2)
+  (make-from-real-img (- (real-part z1) (real-part z2))
+                      (- (imag-part z1) (imag-part z2))))
+
+
+(define (mul-complex z1 z2)
+  (make-from-real-img
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
