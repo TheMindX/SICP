@@ -4,6 +4,7 @@
 (provide common.cube) ;立方
 (provide common.mod) ;取模
 (provide common.even?) ;是否偶数
+(provide common.log) ;日志
 (provide common.println) ;打印
 (provide common.constant) ;常数
 (provide common.gcd) ;公约数
@@ -22,7 +23,17 @@
 
 (define (common.even? x)
   (eq? (common.mod x 2) 0))
-  
+
+
+(define (common.log x . others)
+  (begin (printf "log: ~a" x)
+         (if (null? others)
+             (begin (display "\n") x)
+             (let ((val (foldl 
+                         (lambda (i a) (begin (printf " ~a" i) i)) null others)))
+               (begin (display "\n")
+                      val)))))
+
 
 (define (common.println x)
   (display x)
@@ -52,6 +63,6 @@
           ((vector? x) "Vector")
           ((boolean? x) "Boolean")
           ((symbol? x) "Symbol")          
-		  ((procedure? x) "Procedure")          
+		  ((procedure? x) "Procedure")
 		  ))) 
 
