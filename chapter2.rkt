@@ -612,4 +612,31 @@
       (append (get_bits (car message) tree)
               (encode (cdr message) tree))))
 
-(encode '(A D A B B C A) sample-tree)
+;(encode '(A D A B B C A) sample-tree)
+
+;创建huffman树
+(define (generate-huffman-tree pairs)
+  (huffman-merge (make-leaf-set pairs)))
+
+(define (huffman-merge treeset)
+  (define (fhelp treeset tree)
+    (if (null? treeset)
+        tree
+        (let 
+            ((first (car treeset)))
+          (if (< (weight first) (weight tree))
+              (huffman-merge (adjoin-set tree treeset))
+              (fhelp (cdr treeset) (make-code-tree tree first))))))
+  (if (eq? null (cdr treeset))
+    (car treeset)
+    (fhelp (cdr treeset) (car treeset))))
+
+
+;(generate-huffman-tree '((A 3) (B 14) (C 5)))
+
+;TODO, 2.41
+;TODO, 2.42
+;TODO, 2.43
+;TODO, 2.44
+
+;2.53
