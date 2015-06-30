@@ -660,42 +660,6 @@
    
    
 
-;one rep for complex,
-(define (real-part z) (car z))
-
-(define (imag-part z) (cdr z))
-
-(define (magnitude z)
-  (sqrt (+ (square (real-part z) (square (imag-part z))))))
-
-(define (angle z)
-  (atan (/ (imag-part z) (real-part z))))
-
-
-(define (make-from-real-imag x y) (cons x y))
-
-(define (make-from-mag-ang r a)
-  (cons (* r (cos a)) (* r (sin a))))
-
-;other rep for complex, 极坐标 
-#|
-(define (real-part z) (* (magnitude z) (cos (angle z))))
-
-(define (imag-part z) (* (magnitude z) (sin (angle z))))
-
-(define (magnitude z)
-  (car z))
-
-(define (angle z)
-  (cdr z))
-
-(define (make-from-real-imag x y)
-  (cons ((sqrt (+ (* x x) (* y y))) (atan (/ y x)))))
-
-(define (make-from-mag-ang r a)
-  (cons r a))
-|#
-
 (define (attach-tag type-tag contents)
   (cons type_tag contents))
 
@@ -704,7 +668,53 @@
       (car datum)
       (error "unknown type-tag")))
 
-(
+(define (data datum)
+  (if (pair? datum)
+      (cdr datum)
+      (error "unknown type-tag")))
 
+(define (rect? z)
+  (eq? (type-tag z) 'rect))
+
+(define (polar? z)
+  (eq? (type-tag z) 'polar))
+
+
+;one rep for complex,
+(define (real-part_rect z) (car z))
+
+(define (imag-part_rect z) (cdr z))
+
+(define (magnitude_rect z)
+  (sqrt (+ (square (real-part z) (square (imag-part z))))))
+
+(define (angle_rect z)
+  (atan (/ (imag-part_rect z) (real-part_rect z))))
+
+(define (make-from-real-imag_rect x y) (attach-tag 'rect (cons x y)) )
+
+(define (make-from-mag-ang_rect r a)
+  (attach-tag 'rect (cons (* r (cos a)) (* r (sin a)))))
+
+;other rep for complex, 极坐标 
+
+(define (real-part_polar z) (* (magnitude z) (cos (angle z))))
+
+(define (imag-part_polar z) (* (magnitude z) (sin (angle z))))
+
+(define (magnitude_polar z)
+  (car z))
+
+(define (angle_polar z)
+  (cdr z))
+
+(define (make-from-real-imag_polar x y)
+  (attach-tag 'polar (cons ((sqrt (+ (* x x) (* y y))) (atan (/ y x))))))
+
+(define (make-from-mag-ang_polar r a)
+  (attach-tag 'polar  (cons r a)))
+
+
+;to implement put get
 
 
