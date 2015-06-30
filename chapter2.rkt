@@ -1,6 +1,10 @@
 #lang racket
 (require "common.rkt")
 (require "chapter1.rkt")
+
+(require 2htdp/image)
+
+
 #|
 (define (make-rat n d)
   (define cd (common.gcd n d))
@@ -639,6 +643,7 @@
 
 ;2.53
 
+#|
 (define (add-complex z1 z2)
   (make-from-real-img (+ (real-part z1) (real-part z2))
                       (+ (imag-part z1) (imag-part z2))))
@@ -657,11 +662,11 @@
   (make-from-real-img 
     (/ (magnitude z1) (magnitude z2))
     (- (angle z1) (angle z2))))
-   
-   
+|#
+
 
 (define (attach-tag type-tag contents)
-  (cons type_tag contents))
+  (cons type-tag contents))
 
 (define (type-tag datum)
   (if (pair? datum)
@@ -679,42 +684,80 @@
 (define (polar? z)
   (eq? (type-tag z) 'polar))
 
-
-;one rep for complex,
-(define (real-part_rect z) (car z))
-
-(define (imag-part_rect z) (cdr z))
-
-(define (magnitude_rect z)
-  (sqrt (+ (square (real-part z) (square (imag-part z))))))
-
-(define (angle_rect z)
-  (atan (/ (imag-part_rect z) (real-part_rect z))))
-
-(define (make-from-real-imag_rect x y) (attach-tag 'rect (cons x y)) )
-
-(define (make-from-mag-ang_rect r a)
-  (attach-tag 'rect (cons (* r (cos a)) (* r (sin a)))))
-
-;other rep for complex, 极坐标 
-
-(define (real-part_polar z) (* (magnitude z) (cos (angle z))))
-
-(define (imag-part_polar z) (* (magnitude z) (sin (angle z))))
-
-(define (magnitude_polar z)
-  (car z))
-
-(define (angle_polar z)
-  (cdr z))
-
-(define (make-from-real-imag_polar x y)
-  (attach-tag 'polar (cons ((sqrt (+ (* x x) (* y y))) (atan (/ y x))))))
-
-(define (make-from-mag-ang_polar r a)
-  (attach-tag 'polar  (cons r a)))
-
-
 ;to implement put get
+(define hash-package
+  (make-hash))
+
+(define (put symbol_func type_tag func)
+  (hash-set! hash-package (cons type_tag symbol_func) func))
+
+(define (get symbol_func type_tag)
+  (hash-ref hash-package (cons type_tag symbol_func)))
+
+(define (install-rect-package)
+  (define (real-part z) (car z))
+  (define (imag-part z) (cdr z))
+  (define (magnitude z)
+    (sqrt (+ (square (real-part z) (square (imag-part z))))))
+  (define (angle z)
+    (atan (/ (imag-part z) (real-part z))))
+  (define (make-from-real-img x y) (attach-tag 'rect (cons x y)) )
+  (define (make-from-mag r a)
+    (attach-tag 'rect (cons (* r (cos a)) (* r (sin a)))))
+
+  (put 'real-part '(rect) real-part)
+  (put 'imag-part '(rect) imag-part)
+  (put 'magnitude '(rect) magnitude)
+  (put 'angle '(rect) angle)
+  (put 'make-from-real-img '(rect) make-from-real-img)
+  (put 'make-from-mag '(rect) make-from-mag)
+)
+
+
+(define (install-polar-package)
+  (define (real-part z) (* (magnitude z) (cos (angle z))))
+  (define (imag-part z) (* (magnitude z) (sin (angle z))))
+  (define (magnitude z)
+    (car z))
+  (define (angle z)
+    (cdr z))
+  (define (make-from-real-img x y)
+    (attach-tag 'polar (cons ((sqrt (+ (* x x) (* y y))) (atan (/ y x))))))
+  (define (make-from-mag-ang r a)
+    (attach-tag 'polar  (cons r a)))
+
+  (put 'real-part '(polar) real-part)
+  (put 'imag-part '(polar) imag-part)
+  (put 'magnitude '(polar) magnitude)
+  (put 'angle '(polar) angle)
+  (put 'make-from-real-img '(polar) make-from-real-img)
+  (put 'make-from-mag-ang '(polar) make-from-mag-ang)
+)
+         
+(define (apply-generic op . args)
+  (let* 
+    ((type_tags (map type-tag args))
+     (func (get op type_tags)))
+    (if (eq? func null)
+      (error "unknown func")
+      (apply func (map cdr args) ))))
+
+
+(define (real-part z) (apply-generic 'real-part z))
+(define (imag-part z) (apply-generic 'imag-part z))
+(define (magnitude z) (apply-generic 'magnitude z))
+(define (angle z) (apply-generic 'angle z))
+
+(define (make-from-real-img x y)
+  (get 'make-from-real-img '(rect)) x y)
+
+(define (make-from-mag-ang r a)
+  ((get 'make-from-mag-ang '(polar)) r a))
+
+;(install-rect-package)
+;(install-polar-package)
+;(real-part (make-from-mag-ang 1 (/ 3.14159 4)))
+
+
 
 
