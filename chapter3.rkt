@@ -29,25 +29,26 @@
 
 ;anther way to impl mycons, mutable list
 (define (mycons a b)
-  (lambda (cmd)
-    (cond ((eq? cmd 'car) a)
-          ((eq? cmd 'cdr) b)
-          ((eq? cmd 'set-car) 
-           (lambda (x) (set! a x)))
-          ((eq? cmd 'set-cdr) 
-           (lambda (x) (set! b x))))))
+  (cons 'mycons 
+        (lambda (cmd)
+          (cond ((eq? cmd 'car) a)
+                ((eq? cmd 'cdr) b)
+                ((eq? cmd 'set-car) 
+                 (lambda (x) (set! a x)))
+                ((eq? cmd 'set-cdr) 
+                 (lambda (x) (set! b x)))))))
   
 (define (mycar c)
-  (c 'car))
+  ((cdr c) 'car))
 
 (define (mycdr c)
-  (c 'cdr))
+  ((cdr c) 'cdr))
   
 (define (myset-car c x)
-  ((c 'set-car) x))
+  (((cdr c) 'set-car) x))
   
 (define (myset-cdr c x)
-  ((c 'set-cdr) x))
+  (((cdr c) 'set-cdr) x))
 
 
 (define (test_my_cons)
@@ -61,17 +62,17 @@
 
 
 ; impl queue data
-(define (make-queue)
+(define (mymake-queue)
   (mycons null null))
 
-(define (front-queue q)
+(define (myfront-queue q)
   (mycar (mycar q)))
 
 
-(define (null-queue? q)
+(define (mynull-queue? q)
   (null? (mycar q)))
 
-(define (push-queue q item)
+(define (mypush-queue q item)
   (let ((newpair (mycons item null)))
     (if (null? (mycar q))
         (begin (myset-car q newpair)
@@ -80,31 +81,135 @@
                (myset-cdr q newpair)))))
 
 
-(define (pop-queue q)
+(define (mypop-queue q)
   (if (eq? (mycar q) (mycdr q))
       (begin (myset-car q null)
              (myset-cdr q null))
       (myset-car q (mycdr (mycar q)))))
 
 
-
+#|
 (define (test-myqueue)
-  (letrec ((q (make-queue)))
+  (letrec ((q (mymake-queue)))
             
            (begin 
-             (push-queue q 123)
-             (push-queue q 456)
-             (common.log (front-queue q))
-             (pop-queue q)
-             (common.log (front-queue q))
-             (pop-queue q)
-             (common.log (null-queue? q)))))
-            
-  
-  
-  
-               
+             (mypush-queue q 123)
+             (mypush-queue q 456)
+             (common.log (myfront-queue q))
+             (mypop-queue q)
+             (common.log (myfront-queue q))
+             (mypop-queue q)
+             (common.log (mynull-queue? q)))))
+|#
+;impl table
+
+
+(define (myequal? a b)
+  (if (equal? a b)
+      #t
+      (if (and (pair? a) (pair? b))
+          (if (and (eq? (car a) 'mycons)
+                   (eq? (car b) 'mycons))
+              (if (and (myequal? (mycar a) (mycar b))
+                       (myequal? (mycdr b) (mycdr b)))
+                  #t
+                  #f)
+              #f)
+          #f)))
+
+(define (mymake-table)
+  (mymake-queue))
+
+(define (mynull-table? t)
+  (mynull-queue? t))
+
+(define (myfind-table t key)
+  (if (mynull-table? t)
+      null
+      (letrec ((first-item (mycar t))
+               (find (lambda (ls) ;iter to find match key in list
+                    (if (null? ls)
+                        null
+                        (letrec ((kv (mycar ls))
+                                 (k (mycar kv))
+                                 (v (mycdr kv))
+                                 (next (mycdr ls)))
+                          (if (myequal? k key)
+                              v
+                              (find next)))))))
+        (find first-item))))
+                        
+(define (myinsert-table t key value);insert or update
+    (if (mynull-table? t)
+      (mypush-queue t (mycons key value))
+      (letrec ((first-item (mycar t))
+               (update (lambda (ls) ;iter to update match key in list
+                    (if (null? ls)
+                        (mypush-queue t (mycons key value))
+                        (letrec ((kv (mycar ls))
+                                 (k (mycar kv))
+                                 (v (mycdr kv))
+                                 (next (mycdr ls)))
+                          (if (myequal? k key)
+                              (myset-cdr kv value)
+                              (update next)))))))
+        (update first-item))))
+
+
+
+;(define test-my-table
+;  (letrec ((t (mymake-table)))
+;    (begin (myinsert-table t '(2 5) 3)
+;           (myinsert-table t '(2 5) 5)
+;           (myinsert-table t 1 4)
+;           (common.log (myfind-table t '(2 5) )))))
+
+           
         
+;3.27 memoization
+(define (fib n)
+  (if (eq? n 1)
+      1
+      (if (eq? n 2)
+          1
+          (+ (fib (- n 1)) (fib (- n 2))))))
+
+(define global-table (mymake-table))
+
+;(define (memofib n)
+;  (cond ((eq? n 1) 1)
+;        ((eq? n 2) 1)
+;        (else 
+;         (let ((val (myfind-table global-table '(fib n))))
+;           (if (null? val)
+;               (let ((forceval (+ (memofib (- n 1)) (memofib (- n 2)))))
+;                 (begin (myinsert-table global-table n forceval)
+;                        forceval))
+;               val)))))
 
 
+(define (memo func)
+  (lambda (key)
+    (let ((val (myfind-table global-table key)))
+      (if (null? val)
+        (let ((forceval (func key)))
+          (begin (myinsert-table global-table key forceval)
+            forceval))
+        val))))
 
+
+(define (memofib n)
+  (let ((mfib (memo fib)))
+    (cond 
+      ((eq? n 1) 1)
+      ((eq? n 2) 1)
+      (else (+ (memofib (- n 1)) (memofib (- n 2)))))))
+
+;((memo fib) 28)
+;(memofib 38)
+
+;3.24
+
+  
+  
+  
